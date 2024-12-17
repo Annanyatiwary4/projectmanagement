@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Responsive Signup</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        /* Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #0b0f19; /* Blackish background */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 10px;
+            color: #ffffff; /* White text */
+        }
+
+        /* Card Container */
+        .card-container {
+            width: 100%;
+            max-width: 500px;
+            background-color: #141b2d; /* Darker blue container */
+            border: 1px solid #1f2a48; /* Subtle border */
+            border-radius: 12px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        /* Toggle Slider */
+        .toggle-container {
+            position: relative;
+            width: 100%;
+            background-color:rgb(255, 255, 255);
+            height: 45px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .toggle-btn {
+            flex: 1;
+            text-align: center;
+            font-size: 14px;
+            font-weight: 600;
+            color: #555;
+            cursor: pointer;
+            z-index: 2;
+            padding: 10px;
+            transition: color 0.3s ease-in-out, border 0.3s ease-in-out;
+            border: 2px solid transparent; /* Border around the toggle buttons */
+            border-radius: 6px; /* Rounded corners for the border */
+        }
+
+        .toggle-btn.active {
+            color: #fff;
+            border-color: #1f2a48; /* Blue border for the active state */
+        }
+        
+        .toggle-btn:hover {
+            border-color: #1f2a48; /* Blue border on hover */
+        }
+
+        .toggle-slider {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 50%;
+            background-color: #1f2a48;
+            border-radius: 6px;
+            transition: transform 0.3s ease-in-out;
+        }
+
+        /* Form Container */
+        .form-container {
+            padding: 30px;
+            display: none;
+            animation: slideIn 0.5s ease;
+        }
+
+        .form-container.active {
+            display: block;
+        }
+
+        h2 {
+            font-size: 22px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            text-align: center;
+            color: #4da8ff; /* Blue heading */
+        }
+
+        /* Input Styles */
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 6px;
+            display: block;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            font-size: 14px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        input:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 5px rgba(0, 123, 255, 0.3);
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+            background-color:  #4da8ff; /* Blue heading */
+            color: #fff;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        /* Responsive Styling */
+        @media screen and (max-width: 600px) {
+            .form-container {
+                padding: 20px;
+            }
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        /* Link style for the "Already have an account?" text */
+        .login-link {
+            font-size: 14px;
+            text-align: center;
+            margin-top: 15px;
+        }
+
+        .login-link a {
+            color: #007bff;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .login-link a:hover {
+            text-decoration: underline;
+        }
+
+    </style>
+</head>
+<body>
+    <!-- Card Container -->
+    <div class="card-container">
+        <!-- Toggle Slider -->
+        <div class="toggle-container">
+            <div class="toggle-slider" id="slider"></div>
+            <div id="toggle-candidate" class="toggle-btn active">Signup as Candidate</div>
+            <div id="toggle-admin" class="toggle-btn">Signup as Admin</div>
+        </div>
+
+        <!-- Candidate Form -->
+        <div id="candidate-form" class="form-container active">
+            <h2>Candidate Signup</h2>
+            <form method="POST" action="">
+                {% csrf_token %}
+                <div class="input-group">
+                    <label for="candidate-username">Username</label>
+                    <input type="text" id="candidate-username" name="username" placeholder="Enter username" required>
+                </div>
+                <div class="input-group">
+                    <label for="candidate-email">Email</label>
+                    <input type="email" id="candidate-email" name="email" placeholder="Enter email" required>
+                </div>
+                <div class="input-group">
+                    <label for="candidate-password">Password</label>
+                    <input type="password" id="candidate-password" name="password" placeholder="Enter password" required>
+                </div>
+                <div class="input-group">
+                    <label for="candidate-password">Password</label>
+                    <input type="password" id="candidate-password" name="confirm_password" placeholder="confirm_password" required>
+                </div>
+                
+                <button type="submit">Register as Candidate</button>
+            </form>
+            <p class="login-link">Already have an account? <a href="{% url 'login' %}">Login here</a></p>
+        </div>
+
+        <!-- Admin Form -->
+        <div id="admin-form" class="form-container">
+            <h2>Admin Signup</h2>
+            <form method="POST" action="">
+                {% csrf_token %}
+                <div class="input-group">
+                    <label for="admin-username">Username</label>
+                    <input type="text" id="admin-username" name="username" placeholder="Enter username" required>
+                </div>
+                <div class="input-group">
+                    <label for="admin-email">Email</label>
+                    <input type="email" id="admin-email" name="email" placeholder="Enter email" required>
+                </div>
+                <div class="input-group">
+                    <label for="admin-password">Password</label>
+                    <input type="password" id="admin-password" name="password" placeholder="Enter password" required>
+                </div>
+                <div class="input-group">
+                    <label for="admin-password">Password</label>
+                    <input type="password" id="admin-password" name="confirm_password" placeholder="confirm_password" required>
+                </div>
+                
+                <button type="submit">Register as Admin</button>
+               
+            </form>
+            <p class="login-link">Already have an account? <a href="{% url 'login' %}">Login here</a></p>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+        const slider = document.getElementById('slider');
+        const candidateForm = document.getElementById('candidate-form');
+        const adminForm = document.getElementById('admin-form');
+        const toggleCandidate = document.getElementById('toggle-candidate');
+        const toggleAdmin = document.getElementById('toggle-admin');
+
+        toggleCandidate.addEventListener('click', () => {
+            slider.style.transform = 'translateX(0)';
+            candidateForm.classList.add('active');
+            adminForm.classList.remove('active');
+            toggleCandidate.classList.add('active');
+            toggleAdmin.classList.remove('active');
+        });
+
+        toggleAdmin.addEventListener('click', () => {
+            slider.style.transform = 'translateX(100%)';
+            adminForm.classList.add('active');
+            candidateForm.classList.remove('active');
+            toggleAdmin.classList.add('active');
+            toggleCandidate.classList.remove('active');
+        });
+    </script>
+</body>
+</html>

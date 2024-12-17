@@ -1,0 +1,87 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Homepage - Projectfolio</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" rel="stylesheet">
+    
+</head>
+<body>
+    <section class="grid-1">
+    <h1>Projectfolio</h1>
+    <p>
+        "Manage your projects and track progress seamlessly, all in one platform—take a step towards achieving your goals with clarity and efficiency."
+    </p>
+    <div class="buttons">
+        <a href="{% url 'register_user' %}">Register</a>
+        <a href="{% url 'login' %}">Login</a>
+    </div>
+</section>
+     <section class=grid-2>
+    <div class="card">
+        <div class="feature-card">
+            <div class="card-icon">
+                <i class="fas fa-tasks"></i>
+            </div>
+            <h3>Task Management</h3>
+            <p>Users can create, assign, and prioritize tasks, ensuring clear responsibility and tracking of project progress.</p>
+        </div>
+
+        <!-- Card 2: Progress Tracking and Reports -->
+        <div class="feature-card">
+            <div class="card-icon">
+                <i class="fas fa-chart-line"></i>
+            </div>
+            <h3>Progress Tracking and Reports</h3>
+            <p>Provides real-time updates on task completion, milestones, and overall project progress, with visual reports for better analysis.</p>
+        </div>
+
+        <!-- Card 3: Secure Access and Role Management -->
+        <div class="feature-card">
+            <div class="card-icon">
+                <i class="fas fa-lock"></i>
+            </div>
+            <h3>Secure Access and Role Management</h3>
+            <p>Customizable permissions based on user roles, ensuring controlled access and security within the platform.</p>
+        </div>
+
+        <!-- Card 4: Progress Visualization -->
+        <div class="feature-card">
+            <div class="card-icon">
+                <i class="fas fa-project-diagram"></i>
+            </div>
+            <h3>Progress Visualization</h3>
+            <p>Provides visual representations of the project timeline and task status, making it easier to understand task dependencies and progress at a glance.</p>
+        </div>
+    </div>
+    </section>
+        
+</body>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/IntersectionObserver/0.12.0/intersection-observer.min.js"></script>
+    <script>
+        // IntersectionObserver to reveal cards when they enter the viewport
+        function handleCardVisibility(entries, observer) {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible'); // Add class to make card visible
+                    observer.unobserve(entry.target); // Stop observing the card
+                }
+            });
+        }
+
+        // Observer configuration
+        const observer = new IntersectionObserver(handleCardVisibility, {
+            threshold: 0.1 // 10% of the card must be visible
+        });
+
+        // Observe each feature card
+        document.querySelectorAll('.feature-card').forEach(card => {
+            observer.observe(card);
+        });
+    </script>
+
+</html>
