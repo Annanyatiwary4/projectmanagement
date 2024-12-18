@@ -27,6 +27,11 @@ def register_user(request):
         if password != confirm_password:
             messages.error(request, "Passwords do not match!")
             return redirect('register_user')
+        
+         # Validate role
+        if user_role not in ['admin', 'candidate']:
+            messages.error(request, "Invalid role specified.")
+            return redirect('register_user')
 
         # Create User based on role selection
         if user_role == 'admin':
@@ -178,13 +183,94 @@ def reset_password(request, token):
 
 @login_required(login_url='/login/') 
 def admin_dashboard(request):
-    # Your logic to show the admin dashboard
-    return render(request, 'admin_dashboard.html')
+   projects = Project.objects.all()
+   return render(request, 'admin_dashboard.html', {
+        'projects': projects,
+        
+    })
 
 @login_required(login_url='/login/') 
 def candidate_dashboard(request):
     # Your logic to show the candidate dashboard
     return render(request, 'candidate.html')
 
+# View for adding a project
+def add_project(request):
+    if request.method == 'POST':
+        project_title = request.POST.get('title', '').strip()
+        project_description = request.POST.get('description', '').strip()
+
+        if project_title and project_description:  # Ensure both fields are provided
+            Project.objects.create(title=project_title, description=project_description)
+            messages.success(request, 'Project successfully added!')  # Add success message
+            return redirect('admin_dashboard')  # Redirect to the dashboard after adding a project
+        else:
+            messages.error(request, 'Both title and description are required!')  # Error message for validation failure
+
+    return redirect('add_project') 
 
 
+# View for updating a project
+def update_project(request, project_id):
+    project = get_object_or_404(Project, id=project_id)
+
+    if request.method == 'POST':
+        project_title = request.POST.get('title', '').strip()
+        project_description = request.POST.get('description', '').strip()
+
+        if project_title and project_description:
+            project.title = project_title
+            project.description = project_description
+            project.save()  # Save updated project
+            messages.success(request, 'Project updated successfully!')
+            return redirect('admin_dashboard')  # Redirect to the dashboard
+        else:
+            messages.error(request, 'Both title and description are required!')  # Validation error message
+
+    # Render the admin dashboard with the update modal
+    return render(request, 'admin_dashboard.html', {'project': project})
+
+
+# View for assigning a project to a candidate
+def assign_project(request, project_id):
+    project = get_object_or_404(Project, id=project_id)
+
+    if request.method == "POST":
+        candidate_id = request.POST.get("candidate_id")
+        candidate = get_object_or_404(User, id=candidate_id)
+
+        # Create an assignment record
+        Assignment.objects.create(project=project, user=candidate)
+
+        # Send an email invitation
+        send_mail(
+            subject=f"You've been invited to the project '{project.title}'",
+            message=f"Hello {candidate.username},\n\nYou have been invited to participate in the project '{project.title}'. Please log in to your account to accept the invitation.",
+            from_email="admin@yourwebsite.com",
+            recipient_list=[candidate.email],
+            fail_silently=False,
+        )
+
+        messages.success(request, f"Invitation sent to {candidate.username} for project '{project.title}'.")
+        return redirect("assign_project", project_id=project.id)
+
+    candidates = User.objects.filter(is_candidate=True)  # Fetch all candidates
+    return render(request, "assign.html", {"project": project, "candidates": candidates})
+
+# View for deleting a project
+def delete_project(request, project_id):
+    project = get_object_or_404(Project, id=project_id)
+    
+    if request.method == 'POST':
+        project.delete()  # Delete the project
+        messages.success(request, 'Project deleted successfully!')
+        return redirect('admin_dashboard')
+
+    return render(request, 'delete_project.html', {'project': project})
+
+def get_candidates(request, project_id):
+    project = get_object_or_404(Project, id=project_id)  # Fetch the project
+    candidates = User.objects.filter(is_candidate=True)  # Filter candidates if needed
+
+    # Render the candidates in the template
+    return render(request, 'assign.html', {'project': project, 'candidates': candidates})

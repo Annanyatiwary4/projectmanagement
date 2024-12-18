@@ -1,1 +1,259 @@
-<h1> this is admin dashboard </h1>
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+</head>
+<body>
+    <!-- Dashboard Container -->
+    <div class="admin-dashboard">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <h2>Admin Dashboard</h2>
+            <nav>
+                <ul>
+                    <li><a href="#" id="projects-tab"><i class="fas fa-tasks"></i> Projects</a></li>
+                    <li><a href="#" id="progress-tab"><i class="fas fa-chart-line"></i> Progress</a></li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="content">
+            <!-- Default: Projects Section -->
+            <section id="projects-section" class="dashboard-section active">
+                <h2>Manage Projects</h2>
+                <button class="btn" id="add-project-btn">Add New Project</button>
+            
+                <!-- Overlay -->
+                <div id="overlay" class="overlay"></div>
+            
+                <!-- Modal Structure -->
+                <div id="add-project-modal" class="modal add-project-modal">
+                    <div class="modal-content">
+                        <h3>Add New Project</h3>
+                        <form id="project-form" method="POST" action="/add_project/">
+                            {% csrf_token %}
+                            <input type="text" placeholder="Project Title" id="project-title" name="title" required>
+                            <textarea placeholder="Project Description" rows="4" id="project-desc" name="description" required></textarea>
+                            <button class="btn" id="submit-project" type="submit">Submit</button>
+                        </form>
+                        <button class="btn close-modal" id="close-modal-btn">Close</button>
+                    </div>
+                </div>
+           
+            
+           
+
+                {% if messages %}
+                        <div class="messages">
+                            {% for message in messages %}
+                                <div class="message">{{ message }}</div>
+                            {% endfor %}
+                        </div>
+               {% endif %}
+            
+
+                <!-- Project List -->
+                <div class="project-list">
+                    {% for project in projects %}
+                    <div class="project-card">
+                        <h3>{{ project.title }}</h3>
+                        <p>{{ project.description }}</p>
+                        <div class="actions">
+                            <button class="btn update-btn" onclick="openUpdateModal()">Update</button>  
+                               <!-- Update Project Modal -->
+                                    <div id="update-project-modal" class="modal add-project-modal">
+                                        <div class="modal-content">
+                                            <h3>Update Project</h3>
+                                            <form id="update-project-form" method="POST" action="/update_project/{{ project.id }}/">
+                                                {% csrf_token %}
+                                                <input type="text" placeholder="Project Title" id="update-project-title" name="title" value="{{ project.title }}" required>
+                                                <textarea placeholder="Project Description" rows="4" id="update-project-desc" name="description" required>{{ project.description }}</textarea>
+                                                <button class="btn" id="submit-project" type="submit">Update</button>
+                                            </form>
+                                            <button class="btn close-modal" id="close-modal-btn" onclick="closeModal()">Close</button>
+                                        </div>
+                                    </div>
+
+                                    <!-- Overlay -->
+                                    <div id="overlay" class="overlay"></div>
+                        
+                            <!-- Delete Button (Submit form for Deletion) -->
+                            <form method="POST" action="{% url 'delete_project' project.id %}" style="display: inline-block;">
+                                {% csrf_token %}
+                                <button type="submit" class="btn delete-btn">Delete</button>
+                            </form>
+                        
+                            <!-- Assign Button (Redirect to Assign View) -->
+                            <button class="btn assign-btn" onclick="window.location.href='{% url 'assign_project' project.id %}'">Assign to Candidate</button>
+                        </div>
+                        
+                    </div>
+                    {% empty %}
+                    <p>No projects available. Please add a project!</p>
+                    {% endfor %}
+                </div>
+            
+            </section>
+            
+
+            <!-- Progress Section -->
+            <!-- Progress Section -->
+<section id="progress-section" class="dashboard-section">
+    <h2>Project Progress</h2>
+    <!-- Progress List -->
+    <div class="progress-list">
+        <!-- Example Progress Card -->
+        <div class="progress-card">
+            <h3>Project 1</h3>
+            <p>Assigned Candidates:</p>
+            <ul>
+                <li>Candidate A <button class="btn view-progress-btn">View Progress</button></li>
+                <li>Candidate B <button class="btn view-progress-btn">View Progress</button></li>
+            </ul>
+            
+            <!-- Progress Bar -->
+            <div class="progress-bar-container">
+                <div class="progress-bar">
+                    <span style="width: 60%;"></span>
+                </div>
+            </div>
+            <p class="progress-info">Progress: 60%</p>
+        </div>
+
+        <!-- Another Progress Card -->
+        <div class="progress-card">
+            <h3>Project 2</h3>
+            <p>Assigned Candidates:</p>
+            <ul>
+                <li>Candidate X <button class="btn view-progress-btn">View Progress</button></li>
+                <li>Candidate Y <button class="btn view-progress-btn">View Progress</button></li>
+            </ul>
+            
+            <!-- Progress Bar -->
+            <div class="progress-bar-container">
+                <div class="progress-bar">
+                    <span style="width: 30%;"></span>
+                </div>
+            </div>
+            <p class="progress-info">Progress: 30%</p>
+        </div>
+    </div>
+</section>
+
+</main>
+</div>
+
+    <!-- JavaScript -->
+    <script >
+        // Toggle Between Projects and Progress Sections
+const projectsTab = document.getElementById('projects-tab');
+const progressTab = document.getElementById('progress-tab');
+const projectsSection = document.getElementById('projects-section');
+const progressSection = document.getElementById('progress-section');
+
+// Event Listeners for Sidebar Tabs
+projectsTab.addEventListener('click', () => {
+    projectsSection.classList.add('active');
+    progressSection.classList.remove('active');
+    projectsTab.classList.add('active-tab');
+    progressTab.classList.remove('active-tab');
+});
+
+progressTab.addEventListener('click', () => {
+    progressSection.classList.add('active');
+    projectsSection.classList.remove('active');
+    progressTab.classList.add('active-tab');
+    projectsTab.classList.remove('active-tab');
+});
+
+</script>
+
+
+
+<script>
+
+// Modal and Overlay Elements
+const addProjectBtn = document.getElementById('add-project-btn');
+const modal = document.getElementById('add-project-modal');
+const overlay = document.getElementById('overlay');
+const closeModalBtn = document.getElementById('close-modal-btn');
+
+// Add Project Button Event
+addProjectBtn.addEventListener('click', () => {
+    modal.classList.add('active');
+    overlay.classList.add('active');
+});
+
+// Close Modal when Overlay is Clicked
+overlay.addEventListener('click', () => {
+    closeModal();
+});
+
+// Close Modal Button Event
+closeModalBtn.addEventListener('click', () => {
+    closeModal();
+});
+
+// Function to Close Modal
+function closeModal() {
+    modal.classList.remove('active');
+    overlay.classList.remove('active');
+}
+</script>
+<script>
+    // Example: Dynamically updating progress for a project
+const progressBars = document.querySelectorAll('.progress-bar span');
+const progressInfo = document.querySelectorAll('.progress-info');
+
+// Simulate progress updates
+function updateProgress(projectIndex, progress) {
+    const progressBar = progressBars[projectIndex];
+    const progressText = progressInfo[projectIndex];
+
+    progressBar.style.width = `${progress}%`;
+    progressText.textContent = `Progress: ${progress}%`;
+}
+
+// Example: Update progress for Project 1 to 75%
+updateProgress(0, 75);
+</script>
+
+
+<script>
+    // JavaScript to handle the modal visibility for updating project
+    function openUpdateModal(projectId, projectTitle, projectDesc) {
+        // Set the form values to the current project details
+        document.getElementById('project-title').value = projectTitle;
+        document.getElementById('project-desc').value = projectDesc;
+    
+        // Show the modal and overlay
+        document.getElementById('update-project-modal').classList.add('active');
+        document.getElementById('overlay').classList.add('active');
+    }
+    
+    function closeModal() {
+        document.getElementById('update-project-modal').classList.remove('active');
+        document.getElementById('overlay').classList.remove('active');
+    }
+    </script>
+    <script>
+        // Open Update Project Modal
+        function openUpdateModal() {
+            document.getElementById('update-project-modal').classList.add('active');
+            document.getElementById('overlay').classList.add('active');
+        }
+        
+        // Close the Modal
+        function closeModal() {
+            document.getElementById('update-project-modal').classList.remove('active');
+            document.getElementById('overlay').classList.remove('active');
+        }
+        </script>
+</body>
+</html>

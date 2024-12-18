@@ -208,6 +208,7 @@
             <h2>Candidate Signup</h2>
             <form method="POST" action="">
                 {% csrf_token %}
+                <input type="hidden" name="role" value="candidate"> <!-- Add role -->
                 <div class="input-group">
                     <label for="candidate-username">Username</label>
                     <input type="text" id="candidate-username" name="username" placeholder="Enter username" required>
@@ -221,10 +222,9 @@
                     <input type="password" id="candidate-password" name="password" placeholder="Enter password" required>
                 </div>
                 <div class="input-group">
-                    <label for="candidate-password">Password</label>
-                    <input type="password" id="candidate-password" name="confirm_password" placeholder="confirm_password" required>
+                    <label for="candidate-confirm-password">Confirm Password</label>
+                    <input type="password" id="candidate-confirm-password" name="confirm_password" placeholder="Confirm password" required>
                 </div>
-                
                 <button type="submit">Register as Candidate</button>
             </form>
             <p class="login-link">Already have an account? <a href="{% url 'login' %}">Login here</a></p>
@@ -235,6 +235,7 @@
             <h2>Admin Signup</h2>
             <form method="POST" action="">
                 {% csrf_token %}
+                <input type="hidden" name="role" value="admin"> <!-- Add role -->
                 <div class="input-group">
                     <label for="admin-username">Username</label>
                     <input type="text" id="admin-username" name="username" placeholder="Enter username" required>
@@ -248,12 +249,10 @@
                     <input type="password" id="admin-password" name="password" placeholder="Enter password" required>
                 </div>
                 <div class="input-group">
-                    <label for="admin-password">Password</label>
-                    <input type="password" id="admin-password" name="confirm_password" placeholder="confirm_password" required>
+                    <label for="admin-confirm-password">Confirm Password</label>
+                    <input type="password" id="admin-confirm-password" name="confirm_password" placeholder="Confirm password" required>
                 </div>
-                
                 <button type="submit">Register as Admin</button>
-               
             </form>
             <p class="login-link">Already have an account? <a href="{% url 'login' %}">Login here</a></p>
         </div>
