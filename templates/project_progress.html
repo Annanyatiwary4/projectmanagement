@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Progress</title>
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #000000;
+            color: #e0e0e0;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .progress-container {
+            background: #292c36;
+            padding: 20px 30px;
+            border-radius: 10px;
+            box-shadow: 0px 8px 24px rgba(0, 123, 255, 0.2);
+            width: 90%;
+            max-width: 800px;
+        }
+        .progress-container h2 {
+            color: #ffffff;
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 24px;
+        }
+        .progress-bar-container {
+            margin: 20px 0;
+        }
+        .progress-bar {
+            height: 25px;
+            width: 100%;
+            background-color: #1e1e2b;
+            border-radius: 12px;
+            overflow: hidden;
+            position: relative;
+            margin-bottom: 20px;
+        }
+        .progress-bar-fill {
+            height: 100%;
+            border-radius: 12px;
+            transition: width 0.5s ease;
+        }
+        .completed-bar {
+            background-color: #28a745; /* Green for completed */
+        }
+        .in-progress-bar {
+            background-color: #ffc107; /* Yellow for in-progress */
+        }
+        .remaining-bar {
+            background-color: #dc3545; /* Red for remaining */
+        }
+        .circle-container {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 30px;
+        }
+        .circle {
+            text-align: center;
+            color: #ffffff;
+        }
+        .circle svg {
+            width: 100px;
+            height: 100px;
+            transform: rotate(-90deg);
+        }
+        .circle .circle-bg {
+            fill: none;
+            stroke: #1e1e2b;
+            stroke-width: 10;
+        }
+        .circle .circle-progress {
+            fill: none;
+            stroke: #007bff;
+            stroke-width: 10;
+            stroke-linecap: round;
+            stroke-dasharray: 314; /* Circumference of circle (2 * π * r) */
+            stroke-dashoffset: 314; /* Initial offset */
+            transition: stroke-dashoffset 0.5s ease;
+        }
+        .circle span {
+            position: relative;
+            top: -65px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<div class="progress-container">
+    <h2>{{ project.title }} - Progress</h2>
+
+    <!-- Bar Progress Section -->
+    <div class="progress-bar-container">
+        <p class="progress-label">Total Tasks: {{ project_progress.total_tasks }}</p>
+        <div class="progress-bar">
+            <div class="progress-bar-fill completed-bar" style="width: {{ completed_progress }}%;"></div>
+        </div>
+
+        <p class="progress-label">Completed Tasks: {{ project_progress.completed_tasks }}</p>
+        <div class="progress-bar">
+            <div class="progress-bar-fill completed-bar" style="width: {{ completed_progress }}%;"></div>
+        </div>
+
+        <p class="progress-label">In Progress Tasks: {{ project_progress.in_progress_tasks }}</p>
+        <div class="progress-bar">
+            <div class="progress-bar-fill in-progress-bar" style="width: {{ in_progress_progress }}%;"></div>
+        </div>
+
+        <p class="progress-label">Remaining Tasks: {{ project_progress.remaining_tasks }}</p>
+        <div class="progress-bar">
+            <div class="progress-bar-fill remaining-bar" style="width: {{ remaining_progress }}%;"></div>
+        </div>
+    </div>
+
+    <!-- Circle Progress Section -->
+    <div class="circle-container">
+        <!-- Completed Tasks Circle -->
+        <div class="circle">
+            <svg>
+                <circle class="circle-bg" cx="50" cy="50" r="50"></circle>
+                <circle class="circle-progress" cx="50" cy="50" r="50" style="stroke-dashoffset: {{ completed_offset }};"></circle>
+            </svg>
+            <span>{{ project_progress.completed_tasks }}% Completed</span>
+        </div>
+
+        <!-- In Progress Tasks Circle -->
+        <div class="circle">
+            <svg>
+                <circle class="circle-bg" cx="50" cy="50" r="50"></circle>
+                <circle class="circle-progress" cx="50" cy="50" r="50" style="stroke-dashoffset: {{ in_progress_offset }};"></circle>
+            </svg>
+            <span>{{ project_progress.in_progress_tasks }}% In Progress</span>
+        </div>
+
+        <!-- Remaining Tasks Circle -->
+        <div class="circle">
+            <svg>
+                <circle class="circle-bg" cx="50" cy="50" r="50"></circle>
+                <circle class="circle-progress" cx="50" cy="50" r="50" style="stroke-dashoffset: {{ remaining_offset }};"></circle>
+            </svg>
+            <span>{{ project_progress.remaining_tasks }}% Remaining</span>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

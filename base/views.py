@@ -6,6 +6,7 @@ from django.utils.crypto import get_random_string
 from .models import User
 from django.contrib import messages
 from .models import*
+from django.db.models import F
 
 
 def home(request):
@@ -182,12 +183,21 @@ def reset_password(request, token):
 
 
 @login_required(login_url='/login/') 
+
 def admin_dashboard(request):
-   projects = Project.objects.all()
-   return render(request, 'admin_dashboard.html', {
+    projects = Project.objects.all()
+
+    # Calculate progress for each project
+    for project in projects:
+        total_tasks = project.total_tasks
+        # Correctly access the assignments related to this project
+        completed_tasks = sum([assignment.completed_tasks for assignment in project.assignments.all()])
+        project.progress_percentage = (completed_tasks / total_tasks) * 100 if total_tasks else 0
+
+    return render(request, 'admin_dashboard.html', {
         'projects': projects,
-        
     })
+
 
 @login_required(login_url='/login/') 
 def candidate_dashboard(request):
@@ -195,6 +205,7 @@ def candidate_dashboard(request):
     return render(request, 'candidate.html')
 
 # View for adding a project
+@login_required
 def add_project(request):
     if request.method == 'POST':
         project_title = request.POST.get('title', '').strip()
@@ -211,6 +222,7 @@ def add_project(request):
 
 
 # View for updating a project
+@login_required
 def update_project(request, project_id):
     project = get_object_or_404(Project, id=project_id)
 
@@ -232,6 +244,7 @@ def update_project(request, project_id):
 
 
 # View for assigning a project to a candidate
+@login_required
 def assign_project(request, project_id):
     project = get_object_or_404(Project, id=project_id)
 
@@ -245,8 +258,8 @@ def assign_project(request, project_id):
         # Send an email invitation
         send_mail(
             subject=f"You've been invited to the project '{project.title}'",
-            message=f"Hello {candidate.username},\n\nYou have been invited to participate in the project '{project.title}'. Please log in to your account to accept the invitation.",
-            from_email="admin@yourwebsite.com",
+            message=f"Hello {candidate.username},\n\nYou have been invited to participate in the project '{project.title}'. Please log in to your account to see the project.",
+            from_email="annanyatiwary4@gmail.com",
             recipient_list=[candidate.email],
             fail_silently=False,
         )
@@ -268,9 +281,262 @@ def delete_project(request, project_id):
 
     return render(request, 'delete_project.html', {'project': project})
 
+@login_required
 def get_candidates(request, project_id):
     project = get_object_or_404(Project, id=project_id)  # Fetch the project
     candidates = User.objects.filter(is_candidate=True)  # Filter candidates if needed
 
     # Render the candidates in the template
     return render(request, 'assign.html', {'project': project, 'candidates': candidates})
+
+
+from django.http import HttpResponse
+
+
+
+from reportlab.pdfgen import canvas
+from reportlab.lib.pagesizes import letter
+
+
+# View for admin to see candidate's score and progress for a specific project
+def view_candidate_progress(request, project_id, candidate_id):
+    # Get the project and candidate objects
+    project = get_object_or_404(Project, id=project_id)
+    candidate = get_object_or_404(User, id=candidate_id)
+
+    # Get the assignment for this candidate and project
+    assignment = Assignment.objects.filter(project=project, user=candidate).first()
+
+    if not assignment:
+        return render(request, 'error_page.html', {'message': 'No assignment found for this candidate on the project'})
+
+    # Calculate candidate's progress (you can customize the logic)
+    completed_tasks = assignment.completed_tasks
+    total_tasks = project.total_tasks
+    progress = (completed_tasks / total_tasks) * 100 if total_tasks else 0
+    score = assignment.score  # This is a calculated field
+
+    # Render the template with the assignment details
+    return render(request, 'admin/candidate_progress.html', {
+        'project': project,
+        'candidate': candidate,
+        'progress': progress,
+        'score': score,
+        'completed_tasks': completed_tasks,
+        'total_tasks': total_tasks,
+    })
+
+# Function to download the score as a PDF
+def download_score_pdf(request, project_id, candidate_id):
+    project = get_object_or_404(Project, id=project_id)
+    candidate = get_object_or_404(User, id=candidate_id)
+    assignment = Assignment.objects.filter(project=project, user=candidate).first()
+
+    if not assignment:
+        return HttpResponse("No assignment found", status=404)
+
+    completed_tasks = assignment.completed_tasks
+    total_tasks = project.total_tasks
+    score = assignment.score
+    progress = (completed_tasks / total_tasks) * 100 if total_tasks else 0
+
+    # Create a PDF response
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="score_{candidate.username}_{project.title}.pdf"'
+
+    # Create PDF document
+    p = canvas.Canvas(response, pagesize=letter)
+    p.drawString(100, 750, f"Candidate: {candidate.username}")
+    p.drawString(100, 730, f"Project: {project.title}")
+    p.drawString(100, 710, f"Completed Tasks: {completed_tasks} / {total_tasks}")
+    p.drawString(100, 690, f"Progress: {progress:.2f}%")
+    p.drawString(100, 670, f"Score: {score:.2f}%")
+    p.showPage()
+    p.save()
+
+    return response
+
+# Function to send the score via email
+def send_score_email(request, project_id, candidate_id):
+    project = get_object_or_404(Project, id=project_id)
+    candidate = get_object_or_404(User, id=candidate_id)
+    assignment = Assignment.objects.filter(project=project, user=candidate).first()
+
+    if not assignment:
+        return HttpResponse("No assignment found", status=404)
+
+    completed_tasks = assignment.completed_tasks
+    total_tasks = project.total_tasks
+    score = assignment.score
+    progress = (completed_tasks / total_tasks) * 100 if total_tasks else 0
+
+    # Prepare the email content
+    subject = f"Your Progress and Score for {project.title}"
+    message = f"""
+    Dear {candidate.username},
+    
+    Here is your progress and score for the project: {project.title}.
+    
+    Completed Tasks: {completed_tasks} / {total_tasks}
+    Progress: {progress:.2f}%
+    Score: {score:.2f}%
+    
+    Regards,
+    Your Project Management Team
+    """
+
+    # Send the email
+    send_mail(
+        subject,
+        message,
+        'annanyatiwary4@gmail.com',  # Replace with your admin email
+        [candidate.email],
+        fail_silently=False,
+    )
+
+    return HttpResponse("Score sent to the candidate successfully!", status=200)
+
+###############CANDIDATE VIEWS LOGIC################
+
+@login_required
+def candidate_dashboard(request):
+    user = request.user
+
+    # Get all projects assigned to the user
+    assignments = Assignment.objects.filter(user=user)
+    projects = [assignment.project for assignment in assignments]
+
+    # Calculate the overall progress for the candidate
+    total_projects = assignments.count()
+    completed_projects = assignments.filter(project__completed_tasks=F('project__total_tasks')).count()
+    remaining_projects = total_projects - completed_projects
+
+    # Calculate score as a percentage (avoid division by zero)
+    score = 0
+    if total_projects > 0:
+        score = (completed_projects / total_projects) * 100
+
+    overall_progress = {
+        'total_projects': total_projects,
+        'completed_projects': completed_projects,
+        'remaining_projects': remaining_projects,
+        'score': score  # You can calculate a score here if needed
+    }
+    
+    stroke_dashoffset = 314.16 - (314.16 * overall_progress['score'] / 100)
+
+    return render(request, 'candidate.html', {
+        'projects': projects,
+        'overall_progress': overall_progress,
+        'stroke_dashoffset': stroke_dashoffset
+    })
+
+@login_required
+def project_progress(request, project_id):
+    project = get_object_or_404(Project, id=project_id)
+    tasks = Task.objects.filter(project=project)
+
+    # Calculate the progress of the project
+    total_tasks = tasks.count()
+    completed_tasks = tasks.filter(status='completed').count()
+    in_progress_tasks = tasks.filter(status='in_progress').count()
+    remaining_tasks = total_tasks - completed_tasks - in_progress_tasks
+
+    project_progress = {
+        'total_tasks': total_tasks,
+        'completed_tasks': completed_tasks,
+        'in_progress_tasks': in_progress_tasks,
+        'remaining_tasks': remaining_tasks,
+    }
+
+    # Calculate stroke dash offset for each progress circle
+    completed_progress = (completed_tasks / total_tasks) * 100 if total_tasks > 0 else 0
+    in_progress_progress = (in_progress_tasks / total_tasks) * 100 if total_tasks > 0 else 0
+    remaining_progress = 100 - completed_progress - in_progress_progress
+
+    # Stroke dash offset calculations for circles (314.16 is the circumference of a circle with radius 50)
+    completed_offset = 314.16 - (314.16 * completed_progress / 100)
+    in_progress_offset = 314.16 - (314.16 * in_progress_progress / 100)
+    remaining_offset = 314.16 - (314.16 * remaining_progress / 100)
+
+    return render(request, 'project_progress.html', {
+        'project': project,
+        'project_progress': project_progress,
+        'tasks': tasks,
+        'completed_offset': completed_offset,
+        'in_progress_offset': in_progress_offset,
+        'remaining_offset': remaining_offset,
+    })
+
+@login_required
+def mark_project_completed(request, project_id):
+    if request.method == "POST":
+        project = get_object_or_404(Project, id=project_id)
+
+        # Toggle the completion status
+        if project.completed_tasks == project.total_tasks:
+            project.completed_tasks = 0  # Unmark completion
+        else:
+            project.completed_tasks = project.total_tasks  # Mark as completed
+
+        project.save()
+
+    return redirect('candidate_dashboard')  # Redirect to refresh the progress
+
+
+
+
+@login_required
+def add_task(request, project_id):
+    project = get_object_or_404(Project, id=project_id)
+
+    if request.method == "POST":
+        title = request.POST.get('title')
+        description = request.POST.get('description')
+        Task.objects.create(project=project, title=title, description=description)
+        
+        # Update the project tasks count
+        project.total_tasks += 1
+        project.remaining_tasks += 1
+        project.save()
+
+        return redirect('candidate_dashboard')  # Redirect back to dashboard
+
+    return render(request, 'add_task.html', {'project': project})
+
+
+
+
+from django.core.exceptions import ObjectDoesNotExist
+
+
+@login_required
+@login_required
+def profile_settings(request):
+    try:
+        profile = Profile.objects.get(user=request.user)
+    except ObjectDoesNotExist:
+        # If the user does not have a profile, create one
+        profile = Profile(user=request.user)
+        profile.save()
+
+    if request.method == 'POST':
+        # Manually update the profile data
+        bio = request.POST.get('bio', profile.bio)
+        profile_picture = request.FILES.get('profile_picture', profile.profile_picture)
+
+        profile.bio = bio
+        profile.profile_picture = profile_picture
+
+        profile.save()
+
+        # Show a success message
+        messages.success(request, 'Your profile has been updated successfully!')
+
+        # Redirect to the respective dashboard (Admin or Candidate)
+        if request.user.is_admin:  # Assuming `is_staff` indicates admin user
+            return redirect('admin_dashboard')  # Redirect to admin dashboard
+        else:
+            return redirect('candidate_dashboard')  # Redirect to candidate dashboard
+
+    return render(request, 'profile_settings.html', {'profile': profile})

@@ -15,6 +15,10 @@ urlpatterns = [
     path('update_project/<int:project_id>/', update_project, name='update_project'),
     path('assign_project/<int:project_id>/', assign_project, name='assign_project'),
     path('delete_project/<int:project_id>/', delete_project, name='delete_project'),
-     path("get_candidates/<int:project_id>/", get_candidates, name="get_candidates"),
-    
+    path('get_candidates/<int:project_id>/', get_candidates, name="get_candidates"),
+     path('candidate_dashboard/', candidate_dashboard, name='candidate_dashboard'),
+    path('project_progress/<int:project_id>/', project_progress, name='project_progress'),
+    path('add_task/<int:project_id>/', add_task, name="add_task"),
+     path('profile/settings/',profile_settings, name='profile_settings'),
+    path('mark-as-completed/<int:project_id>/', mark_project_completed, name='mark_project_completed'),
 ]

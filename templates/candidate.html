@@ -1,1 +1,166 @@
-<h1>this is candidate dashboard </h1>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Candidate Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/candidate.css' %}">  <!-- Link your CSS file here -->
+</head>
+<body>
+   <!-- Sidebar -->
+<div class="sidebar">
+    <div class="sidebar-header">
+        <h2>Projectfolio</h2> <!-- Replace with your brand name/logo -->
+    </div>
+
+    <!-- Welcome and Profile Picture Section -->
+    <div class="profile-info">
+        <p>Welcome, {{ user.username }}</p> <!-- Dynamic username -->
+        <img src="{{ user.profile.profile_picture.url }}" alt="Profile Picture" class="profile-img"> <!-- Profile picture -->
+    </div>
+
+    <!-- Sidebar Navigation Links -->
+    <ul class="sidebar-nav">
+        <li><a href="/candidate_dashboard/">Dashboard</a></li>
+        <li class="dropdown">
+            <a href="javascript:void(0)" class="dropbtn">Account</a>
+            <div class="dropdown-content">
+                <a href="/profile/settings/">Edit Profile</a>
+                <a href="/logout/">Logout</a>
+            </div>
+    </ul>
+</div>
+
+
+
+       <!-- Main Content Area -->
+<div class="main-content">
+    <!-- Progress Section (Upper Section) -->
+    <div class="progress-section" style="background:rgb(0, 0, 0); padding: 40px; border-radius: 10px; box-shadow: 0px 8px 24px rgba(0, 123, 255, 0.2);">
+        <h3>Overall Progress</h3>
+
+        <!-- Progress Section Container (Flexbox for horizontal alignment) -->
+        <div class="progress-container" style="display: flex; align-items: center; justify-content: space-between;">
+            <!-- Circular Progress -->
+            <!-- Circular Progress Inside a Box -->
+            <div class="circle-box" style="width: 200px; height: 200px; border-radius: 50%; box-shadow: 0px 8px 24px rgb(6, 35, 67); display: flex; align-items: center; justify-content: center; position: relative; margin: auto;">
+                <svg class="circle-progress" width="160" height="160" viewBox="0 0 160 160" xmlns="http://www.w3.org/2000/svg">
+                        <circle class="circle-bg" cx="80" cy="80" r="70" stroke-width="12" fill="none" style="stroke: #3a3a4f;" />
+                        <circle class="circle-fg" cx="80" cy="80" r="70" stroke-width="12" fill="none" style="stroke: #007bff; stroke-dasharray: 439.82; stroke-dashoffset: {{ stroke_dashoffset }}; transition: stroke-dashoffset 0.5s ease;" />
+                    </svg>
+                    <div class="progress-text" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 24px; font-weight: bold; color: #ffffff;">
+                        <h4>{{ overall_progress.score }}%</h4>
+                    </div>
+                </div>
+
+
+            <!-- Progress Information with Bars beside the circle -->
+            <div class="progress-info-with-bars" style="flex: 2; margin-left: 20px;">
+                <div class="progress-bar-item" style="margin-bottom: 10px;">
+                    <p><strong>Total Projects:</strong> {{ overall_progress.total_projects }}</p>
+                    <div class="progress-bar" style="background: #e0e0e0; height: 8px; width: 100%; border-radius: 4px;">
+                        <div class="progress" style="background:rgb(76, 111, 175); height: 8px; width: {{ overall_progress.score }}%; border-radius: 4px;"></div>
+                    </div>
+                </div>
+
+                <div class="progress-bar-item" style="margin-bottom: 10px;">
+                    <p><strong>Completed Projects:</strong> {{ overall_progress.completed_projects }}</p>
+                    <div class="progress-bar" style="background: #e0e0e0; height: 8px; width: 100%; border-radius: 4px;">
+                        <div class="progress" style="background:rgb(76, 111, 175); height: 8px; width: {{ overall_progress.score }}%; border-radius: 4px;"></div>
+                    </div>
+                </div>
+
+                <div class="progress-bar-item" style="margin-bottom: 10px;">
+                    <p><strong>Remaining Projects:</strong> {{ overall_progress.remaining_projects }}</p>
+                    <div class="progress-bar" style="background: #e0e0e0; height: 8px; width: 100%; border-radius: 4px;">
+                        <div class="progress" style="background:rgb(76, 111, 175); height: 8px; width: {{ overall_progress.score }}%; border-radius: 4px;"></div>
+                    </div>
+                </div>
+
+                <div class="progress-bar-item" style="margin-bottom: 10px;">
+                    <p><strong>Score:</strong> {{ overall_progress.score }}%</p>
+                    <div class="progress-bar" style="background: #e0e0e0; height: 8px; width: 100%; border-radius: 4px;">
+                        <div class="progress" style="backgroundrgb(76, 111, 175); height: 8px; width: {{ overall_progress.score }}%; border-radius: 4px;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+
+           <!-- Projects Section (Lower Section) -->
+
+    <!-- Horizontal Line to Separate Progress and Projects -->
+
+<div class="projects-section" style="background:rgb(0, 0, 0); padding: 20px; border-radius: 10px; box-shadow: 0px 8px 24px rgba(0, 123, 255, 0.2);">
+    <!-- Title of the section -->
+    <h3 style="color: #ffffff; text-align: center; margin-bottom: 20px; font-size: 24px;">Assigned Projects</h3>
+
+    <!-- Project List Section (each project displayed in a separate card) -->
+    <div class="project-list" style="display: flex; flex-direction: column; gap: 20px;">
+        {% for project in projects %}
+        <!-- Project Item -->
+        <div class="project-item" style="background: #333; color: #fff; padding: 20px; border-radius: 10px; box-shadow: 0px 4px 12px rgba(0, 123, 255, 0.3);background:rgb(0, 0, 0);">
+            <div style="flex: 1; text-align: left;">
+                <span style="color: #007bff; font-size: 20px; font-weight: bold; display: block;">{{ project.title }}</span>
+                <p style="color: #e0e0e0; font-size: 14px;">{{ project.description }}</p>
+            </div>
+
+            <!-- Buttons Section -->
+            <div style="display: flex; flex-direction: column; gap: 15px; text-align: center;">
+                <!-- View Progress Button -->
+                <a href="{% url 'project_progress' project.id %}" style="text-decoration: none; color: #ffffff; font-weight: bold; padding: 10px 15px; border: 2px solid #007bff; border-radius: 5px; transition: all 0.3s ease; background: transparent;">
+                    View Progress
+                </a>
+
+                <!-- Add Task Button -->
+                <a href="{% url 'add_task' project.id %}" style="text-decoration: none; color: #ffffff; font-weight: bold; padding: 10px 15px; background: #007bff; border: none; border-radius: 5px; transition: all 0.3s ease;">
+                    <span style="font-size: 18px; font-weight: normal;">+ Add Task</span>
+                </a>
+
+                <!-- Mark Completed Form -->
+                <form method="POST" action="{% url 'mark_project_completed' project.id %}" style="margin: 0;">
+                    {% csrf_token %}
+                    <button type="submit" style="background:rgb(40, 93, 167); color: #ffffff; border: none; padding: 10px 20px; border-radius: 5px; font-weight: bold; transition: all 0.3s ease; cursor: pointer; display: flex; align-items: center; gap: 8px;">
+                        <span>Mark as Completed</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="#fff" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M5 12l5 5L19 7"></path>
+                        </svg>
+                    </button>
+                </form>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+
+    <script>
+        function markProjectCompleted(projectId) {
+            // Logic for marking a project as completed
+            alert('Project ' + projectId + ' marked as completed!');
+        }
+    </script>
+<script>
+    // Function to update the circular progress dynamically
+    function updateCircleProgress(score) {
+        const circle = document.querySelector('.circle-fg');
+        const radius = circle.r.baseVal.value;
+        const circumference = 2 * Math.PI * radius;
+        const offset = circumference - (score / 100) * circumference;
+        
+        circle.style.strokeDashoffset = offset;
+    }
+    
+    // Call this function on page load with the dynamic score
+    document.addEventListener("DOMContentLoaded", function() {
+        const score = {{ overall_progress.score }}; // Dynamic score value
+        updateCircleProgress(score);
+    });
+</script>    
+
+</body>
+</html>

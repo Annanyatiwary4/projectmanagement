@@ -108,7 +108,7 @@ h2 {
 }
 
 #add-project-btn {
-    background-color: #00aaff;
+    background-color: #005eff;
     color: white;
     border: none;
     padding: 12px 20px;
@@ -134,10 +134,10 @@ h2 {
 }
 
 .project-card {
-    background-color: #ffffff;
+    background-color: #000000;
     border: 1px solid #ddd;
     border-radius: 10px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 6px rgba(5, 103, 238, 0.303);
     padding: 20px;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
@@ -151,7 +151,7 @@ h2 {
 .project-card h3 {
     font-size: 1.4rem;
     margin-bottom: 10px;
-    color: #333;
+    color: #2064d9;
 }
 
 .project-card p,
@@ -169,7 +169,7 @@ h2 {
 
 
 .project-card .btn {
-    background-color: #00aaff;
+    background-color: #0077ff;
     color: white;
     border: none;
     padding: 8px 12px;
