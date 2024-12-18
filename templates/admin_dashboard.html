@@ -18,6 +18,9 @@
                 <ul>
                     <li><a href="#" id="projects-tab"><i class="fas fa-tasks"></i> Projects</a></li>
                     <li><a href="#" id="progress-tab"><i class="fas fa-chart-line"></i> Progress</a></li>
+                    <a href="{% url 'logout' %}" class="btn" style="display: inline-block; padding: 10px 20px; font-size: 16px; font-weight: bold; text-align: center; text-decoration: none; border-radius: 5px; background-color #00aaff;; color: white; transition: background-color 0.3s ease;" 
+   onmouseover="this.style.backgroundColor='#d32f2f';" onmouseout="this.style.backgroundColor=' #00aaff;">Logout</a>
+
                 </ul>
             </nav>
         </aside>
@@ -110,41 +113,36 @@
     <div class="progress-list">
         <!-- Example Progress Card -->
         <div class="progress-card">
-            <h3>Project 1</h3>
-            <p>Assigned Candidates:</p>
-            <ul>
-                <li>Candidate A <button class="btn view-progress-btn">View Progress</button></li>
-                <li>Candidate B <button class="btn view-progress-btn">View Progress</button></li>
-            </ul>
+            
             
             <!-- Progress Bar -->
-            <div class="progress-bar-container">
-                <div class="progress-bar">
-                    <span style="width: 60%;"></span>
+            <section class="progress-section">
+                <h2>Project Progress</h2>
+                <div class="progress-cards-container">
+                    {% for project in projects %}
+                    <div class="progress-card">
+                        <h3>{{ project.title }}</h3>
+                        <p>Assigned Candidates:</p>
+                        <ul>
+                            {% for assignment in project.assignments.all %}
+                                <li>{{ assignment.user.username }} 
+                                    <button class="btn view-progress-btn">View Progress</button>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                        
+                        <!-- Progress Bar -->
+                        <div class="progress-bar-container">
+                            <div class="progress-bar">
+                                <span style="width: {{ project.progress_percentage }}%;"></span>
+                            </div>
+                        </div>
+                        <p class="progress-info">Progress: {{ project.progress_percentage|floatformat:2 }}%</p>
+                    </div>
+                    {% endfor %}
                 </div>
-            </div>
-            <p class="progress-info">Progress: 60%</p>
-        </div>
-
-        <!-- Another Progress Card -->
-        <div class="progress-card">
-            <h3>Project 2</h3>
-            <p>Assigned Candidates:</p>
-            <ul>
-                <li>Candidate X <button class="btn view-progress-btn">View Progress</button></li>
-                <li>Candidate Y <button class="btn view-progress-btn">View Progress</button></li>
-            </ul>
+            </section>
             
-            <!-- Progress Bar -->
-            <div class="progress-bar-container">
-                <div class="progress-bar">
-                    <span style="width: 30%;"></span>
-                </div>
-            </div>
-            <p class="progress-info">Progress: 30%</p>
-        </div>
-    </div>
-</section>
 
 </main>
 </div>
