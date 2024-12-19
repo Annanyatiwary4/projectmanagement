@@ -1,0 +1,32 @@
+# Python bytecode files
+*.pyc
+*.pyo
+__pycache__/
+staticfiles/
+
+# Virtual environment directories
+myvenv/
+.env
+env/
+.venv
+
+
+# Django migrations
+**/migrations/
+
+# SQLite database
+db.sqlite3
+
+/static/
+/staticfiles/
+/media/
+
+
+
+# PyCharm/VSCode project settings
+.vscode/
+
+!.vscode/settings.json 
+!.vscode/tasks.json 
+!.vscode/launch.json 
+!.vscode/extensions.json
